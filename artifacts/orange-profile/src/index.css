@@ -199,6 +199,41 @@ body.has-custom-cursor, body.has-custom-cursor * { cursor:none !important; }
   transition:color .25s ease, transform .3s ease;
 }
 .profile-card:hover .profile-name { color:var(--orange-soft); transform:translate3d(2px,0,14px); }
+.lyrics-panel {
+  position:absolute;
+  z-index:3;
+  top:50%;
+  left:max(16px,calc((100vw - 1100px)/2));
+  display:flex;
+  width:min(300px,calc(100vw - 640px));
+  height:min(390px,52dvh);
+  min-height:250px;
+  flex-direction:column;
+  padding:15px 16px 12px;
+  transform:translateY(-50%);
+  overflow:hidden;
+  border:1px solid rgba(255,166,97,.25);
+  border-radius:18px;
+  background:linear-gradient(145deg,rgba(35,30,27,.78),rgba(12,11,11,.84) 64%,rgba(24,18,14,.8));
+  box-shadow:0 14px 42px rgba(0,0,0,.38),0 0 28px rgba(255,91,0,.075),inset 0 1px rgba(255,255,255,.1);
+  backdrop-filter:blur(20px) saturate(145%);
+  -webkit-backdrop-filter:blur(20px) saturate(145%);
+}
+.lyrics-panel-header { display:flex; min-height:39px; align-items:center; justify-content:space-between; gap:12px; padding-bottom:11px; border-bottom:1px solid rgba(255,255,255,.07); }
+.lyrics-heading { min-width:0; }
+.lyrics-kicker { display:block; color:#a68b76; font:7px/1.2 var(--app-font-mono); letter-spacing:.15em; }
+.lyrics-track-title { overflow:hidden; margin:5px 0 0; color:#f7ede4; font-size:13px; font-weight:650; letter-spacing:-.025em; text-overflow:ellipsis; white-space:nowrap; }
+.lyrics-sync-state { display:flex; flex:none; align-items:center; gap:6px; padding:5px 7px; color:#92867e; border:1px solid rgba(255,255,255,.08); border-radius:999px; font:7px/1 var(--app-font-mono); }
+.lyrics-sync-state.is-ready { color:#ffc08c; border-color:rgba(255,154,67,.24); }
+.lyrics-sync-dot { width:5px; height:5px; border-radius:50%; background:#81766f; }
+.lyrics-sync-state.is-ready .lyrics-sync-dot { background:var(--orange-soft); box-shadow:0 0 9px rgba(255,154,67,.78); }
+.lyrics-scroll { position:relative; flex:1; min-height:0; margin:10px -7px 0; padding:52px 7px; overflow:auto; overscroll-behavior:contain; scrollbar-width:none; mask-image:linear-gradient(to bottom,transparent,#000 18%,#000 82%,transparent); }
+.lyrics-scroll::-webkit-scrollbar { display:none; }
+.lyrics-line { margin:0; padding:7px 10px; color:rgba(244,240,235,.47); border-left:1px solid transparent; border-radius:0 8px 8px 0; font-size:10px; font-weight:550; line-height:1.55; opacity:.78; transition:color .3s ease,background-color .3s ease,opacity .3s ease,transform .3s ease; }
+.lyrics-line.is-active { color:#fff1e5; border-left-color:var(--orange); background:linear-gradient(90deg,rgba(255,121,12,.12),rgba(255,121,12,.025)); font-size:12px; opacity:1; text-shadow:0 0 18px rgba(255,121,12,.2); transform:translateX(3px); }
+.lyrics-empty { display:flex; flex:1; flex-direction:column; align-items:center; justify-content:center; gap:9px; padding:24px 15px; text-align:center; }
+.lyrics-empty-label { color:#ff9a43; font:7px var(--app-font-mono); letter-spacing:.15em; }
+.lyrics-empty p { max-width:215px; margin:0; color:#948982; font-size:10px; line-height:1.7; }
 .profile-status {
   display:flex;
   min-width:0;
@@ -623,6 +658,7 @@ body.has-custom-cursor, body.has-custom-cursor * { cursor:none !important; }
 }
 @media (max-width:650px) {
   .profile-card { top:38%; gap:14px; width:min(320px,calc(100vw - 36px)); padding:3px 18px 3px 12px; }
+  .lyrics-panel { display:none; }
   .profile-avatar { width:34px; height:34px; }
   .profile-name { font-size:12px; }
   .player-card { bottom:max(18%,154px); width:min(520px,calc(100vw - 24px)); padding:10px 11px 9px; }
@@ -638,8 +674,12 @@ body.has-custom-cursor, body.has-custom-cursor * { cursor:none !important; }
   .video-window-shortcut { font-size:7px; }
 }
 @media (min-width:651px) and (max-width:900px) {
+  .lyrics-panel { display:none; }
   .player-card { bottom:max(17%,148px); width:min(520px,calc(100vw - 32px)); }
   .actions { right:50%; bottom:2%; transform:translateX(50%); width:max-content; animation-name:actions-appear-mobile; }
+}
+@media (max-height:480px) {
+  .lyrics-panel { display:none; }
 }
 @media (min-width:901px) and (max-width:1100px) {
   .player-card { width:min(520px,calc(100vw - 32px)); }

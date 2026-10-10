@@ -18,6 +18,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { toast } from '@/hooks/use-toast';
 import NotFound from '@/pages/not-found';
+import { LyricsPanel } from '@/components/lyrics-panel';
 import {
   Check,
   ChevronDown,
@@ -201,6 +202,7 @@ type MusicTrack = {
   subtitle: string;
   source: string;
   cover: string;
+  lyricsSource?: string;
 };
 
 const MUSIC_TRACKS: MusicTrack[] = [
@@ -217,6 +219,7 @@ const MUSIC_TRACKS: MusicTrack[] = [
     subtitle: 'PUPSIES · MISERY',
     source: `${import.meta.env.BASE_URL}audio/misery.mp3`,
     cover: `${import.meta.env.BASE_URL}images/misery-cover.png`,
+    lyricsSource: `${import.meta.env.BASE_URL}api/storage/public-objects/lyrics/misery.lrc`,
   },
   {
     id: 'all-i-want-for-christmas',
@@ -1052,6 +1055,12 @@ function Home() {
           <span className="profile-status-text">{profileStatusLabel}</span>
         </button>
       </div>
+
+      <LyricsPanel
+        currentTime={currentTime}
+        lyricsSource={currentTrack.lyricsSource}
+        trackTitle={currentTrack.title}
+      />
 
       <section
         ref={musicDrag.panelRef}
