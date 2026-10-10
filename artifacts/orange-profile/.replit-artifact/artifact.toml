@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Animated Orange Profile Website"
+description = "The original animated personal profile website from linked GitHub repository, including its orange-accented profile card, About Me panel, and music player."
+version = "1.0.0"
+id = "artifacts/orange-profile"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24852
+
+[services.development]
+run = "pnpm --filter @workspace/orange-profile run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/orange-profile", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/orange-profile/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24852"
+BASE_PATH = "/"

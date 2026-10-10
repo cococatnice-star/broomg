@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: chat
+    description: Public and private profile chat
 paths:
   /healthz:
     get:
@@ -24,6 +26,174 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /chat/messages/public:
+    get:
+      operationId: listPublicChatMessages
+      tags: [chat]
+      summary: List recent public chat messages
+      responses:
+        "200":
+          description: Recent public messages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatMessagesResponse"
+  /chat/messages:
+    post:
+      operationId: createChatMessage
+      tags: [chat]
+      summary: Create a public message or send a private message to the owner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatMessageInput"
+      responses:
+        "201":
+          description: Message created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatMessage"
+        "400":
+          description: Invalid message
+  /chat/conversations/{conversationId}:
+    get:
+      operationId: getVisitorChatConversation
+      tags: [chat]
+      summary: Read a visitor's private conversation
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-Chat-Token
+          in: header
+          required: true
+          schema:
+            type: string
+            minLength: 36
+            maxLength: 128
+      responses:
+        "200":
+          description: Private conversation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatThreadResponse"
+        "403":
+          description: Invalid visitor token
+  /chat/owner/conversations:
+    get:
+      operationId: listOwnerChatConversations
+      tags: [chat]
+      summary: List private conversations for the owner
+      responses:
+        "200":
+          description: Private conversations
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OwnerConversationsResponse"
+        "401":
+          description: Sign in required
+        "403":
+          description: Owner access required
+  /chat/owner/conversations/{conversationId}:
+    get:
+      operationId: getOwnerChatConversation
+      tags: [chat]
+      summary: Read a private conversation as the owner
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Private conversation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatThreadResponse"
+        "401":
+          description: Sign in required
+        "403":
+          description: Owner access required
+        "404":
+          description: Conversation not found
+  /chat/owner/conversations/{conversationId}/messages:
+    post:
+      operationId: sendOwnerChatReply
+      tags: [chat]
+      summary: Send a private reply to a visitor
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OwnerChatReplyInput"
+      responses:
+        "201":
+          description: Reply sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatMessage"
+        "401":
+          description: Sign in required
+        "403":
+          description: Owner access required
+        "404":
+          description: Conversation not found
+  /chat/stream:
+    get:
+      operationId: streamChatMessages
+      tags: [chat]
+      summary: Subscribe to chat updates over server-sent events
+      parameters:
+        - name: scope
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [public, visitor, owner]
+        - name: conversationId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: X-Chat-Token
+          in: header
+          required: false
+          schema:
+            type: string
+            minLength: 36
+            maxLength: 128
+      responses:
+        "200":
+          description: Server-sent event stream
+          content:
+            text/event-stream:
+              schema:
+                type: string
+        "401":
+          description: Sign in required for owner stream
+        "403":
+          description: Not authorized for this stream
 components:
   schemas:
     HealthStatus:
@@ -33,4 +203,99 @@ components:
           type: string
       required:
         - status
+    ChatMessageChannel:
+      type: string
+      enum: [public, private]
+    ChatSenderRole:
+      type: string
+      enum: [visitor, owner]
+    ChatMessage:
+      type: object
+      properties:
+        id:
+          type: integer
+        conversationId:
+          type: ["string", "null"]
+          format: uuid
+        channel:
+          $ref: "#/components/schemas/ChatMessageChannel"
+        senderRole:
+          $ref: "#/components/schemas/ChatSenderRole"
+        senderName:
+          type: string
+        body:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, conversationId, channel, senderRole, senderName, body, createdAt]
+    ChatMessagesResponse:
+      type: object
+      properties:
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChatMessage"
+      required: [messages]
+    ChatMessageInput:
+      type: object
+      properties:
+        channel:
+          $ref: "#/components/schemas/ChatMessageChannel"
+        senderName:
+          type: string
+          minLength: 1
+          maxLength: 32
+        body:
+          type: string
+          minLength: 1
+          maxLength: 1200
+        visitorToken:
+          type: string
+          minLength: 36
+          maxLength: 128
+        conversationId:
+          type: ["string", "null"]
+          format: uuid
+      required: [channel, senderName, body, visitorToken]
+    ChatConversationSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        guestName:
+          type: string
+        preview:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+      required: [id, guestName, preview, updatedAt]
+    ChatThreadResponse:
+      type: object
+      properties:
+        conversation:
+          $ref: "#/components/schemas/ChatConversationSummary"
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChatMessage"
+      required: [conversation, messages]
+    OwnerConversationsResponse:
+      type: object
+      properties:
+        conversations:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChatConversationSummary"
+      required: [conversations]
+    OwnerChatReplyInput:
+      type: object
+      properties:
+        body:
+          type: string
+          minLength: 1
+          maxLength: 1200
+      required: [body]
 
