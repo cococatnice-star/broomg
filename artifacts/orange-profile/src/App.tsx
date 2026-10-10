@@ -205,6 +205,13 @@ type MusicTrack = {
 
 const MUSIC_TRACKS: MusicTrack[] = [
   {
+    id: 'its-like-im-not-even-here-slowed',
+    title: "It's Like I'm Not Even Here [Slowed] ❀",
+    subtitle: 'MACY TILL · SLOWED',
+    source: `${import.meta.env.BASE_URL}api/storage/public-objects/audio/its-like-im-not-even-here-slowed.mp3`,
+    cover: `${import.meta.env.BASE_URL}api/storage/public-objects/images/its-like-im-not-even-here-slowed-cover.jpg`,
+  },
+  {
     id: 'misery',
     title: 'Misery',
     subtitle: 'PUPSIES · MISERY',
